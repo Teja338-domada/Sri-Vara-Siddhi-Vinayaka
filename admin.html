@@ -1,0 +1,107 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Temple Donations</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { background-color: #f8f9fa; padding: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    .admin-form { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-center mb-4">Admin Login</h2>
+    
+    <div class="admin-form" id="login-section">
+      <div class="mb-3">
+        <label>Username</label>
+        <input type="text" class="form-control" id="adminUser" />
+      </div>
+      <div class="mb-3">
+        <label>Password</label>
+        <input type="password" class="form-control" id="adminPass" />
+      </div>
+      <button class="btn btn-primary" onclick="loginAdmin()">Login</button>
+    </div>
+
+    <div class="admin-form d-none" id="donation-section">
+      <h4>Manage Donations</h4>
+      <form id="donationForm" onsubmit="addDonation(event)">
+        <input type="text" id="donorName" placeholder="Donor Name" class="form-control mb-2" required />
+        <input type="number" id="donationAmount" placeholder="Donation Amount" class="form-control mb-2" required />
+        <button class="btn btn-success">Add Donation</button>
+      </form>
+
+      <table class="table table-striped mt-4">
+        <thead>
+          <tr>
+            <th>Donor Name</th>
+            <th>Amount (₹)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="donationTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const USERNAME = 'admin';
+    const PASSWORD = 'temple123';
+    let donations = JSON.parse(localStorage.getItem('donations') || '[]');
+
+    function loginAdmin() {
+      const user = document.getElementById('adminUser').value;
+      const pass = document.getElementById('adminPass').value;
+      if (user === USERNAME && pass === PASSWORD) {
+        document.getElementById('login-section').classList.add('d-none');
+        document.getElementById('donation-section').classList.remove('d-none');
+        renderDonations();
+      } else {
+        alert('Incorrect credentials!');
+      }
+    }
+
+    function addDonation(event) {
+      event.preventDefault();
+      const name = document.getElementById('donorName').value.trim();
+      const amount = document.getElementById('donationAmount').value.trim();
+
+      if (!name || !amount || isNaN(amount)) {
+        alert("Please enter valid details.");
+        return;
+      }
+
+      donations.push({ name, amount });
+      localStorage.setItem('donations', JSON.stringify(donations));
+      renderDonations();
+      event.target.reset();
+    }
+
+    function deleteDonation(index) {
+      if (confirm("Are you sure you want to delete this donation?")) {
+        donations.splice(index, 1);
+        localStorage.setItem('donations', JSON.stringify(donations));
+        renderDonations();
+      }
+    }
+
+    function renderDonations() {
+      const table = document.getElementById('donationTable');
+      table.innerHTML = '';
+      donations.forEach((don, index) => {
+        table.innerHTML += `
+          <tr>
+            <td>${don.name}</td>
+            <td>${don.amount}</td>
+            <td><button class="btn btn-danger btn-sm" onclick="deleteDonation(${index})">Delete</button></td>
+          </tr>`;
+      });
+    }
+  </script>
+</body>
+</html>
